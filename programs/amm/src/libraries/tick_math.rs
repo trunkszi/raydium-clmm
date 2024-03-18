@@ -30,7 +30,7 @@ const BIT_PRECISION: u32 = 16;
 ///
 pub fn get_sqrt_price_at_tick(tick: i32) -> Result<u128, anchor_lang::error::Error> {
     let abs_tick = tick.abs() as u32;
-    require!(abs_tick <= MAX_TICK as u32, ErrorCode::TickUpperOverflow);
+    // require!(abs_tick <= MAX_TICK as u32, ErrorCode::TickUpperOverflow);
 
     // i = 0
     let mut ratio = if abs_tick & 0x1 != 0 {

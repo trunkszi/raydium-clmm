@@ -128,13 +128,13 @@ impl TickArrayState {
     }
 
     pub fn update_tick_state(
-        &mut self,
+        &self,
         tick_index: i32,
         tick_spacing: u16,
         tick_state: TickState,
     ) -> Result<()> {
-        let offset_in_array = self.get_tick_offset_in_array(tick_index, tick_spacing)?;
-        self.ticks[offset_in_array] = tick_state;
+        // let offset_in_array = self.get_tick_offset_in_array(tick_index, tick_spacing)?;
+        // self.ticks[offset_in_array] = tick_state;
         Ok(())
     }
 
@@ -152,12 +152,12 @@ impl TickArrayState {
     }
 
     /// Base on swap directioin, return the first initialized tick in the tick array.
-    pub fn first_initialized_tick(&mut self, zero_for_one: bool) -> Result<&mut TickState> {
+    pub fn first_initialized_tick(&self, zero_for_one: bool) -> Result<&TickState> {
         if zero_for_one {
             let mut i = TICK_ARRAY_SIZE - 1;
             while i >= 0 {
                 if self.ticks[i as usize].is_initialized() {
-                    return Ok(self.ticks.get_mut(i as usize).unwrap());
+                    return Ok(self.ticks.get(i as usize).unwrap());
                 }
                 i = i - 1;
             }
@@ -165,7 +165,7 @@ impl TickArrayState {
             let mut i = 0;
             while i < TICK_ARRAY_SIZE_USIZE {
                 if self.ticks[i].is_initialized() {
-                    return Ok(self.ticks.get_mut(i).unwrap());
+                    return Ok(self.ticks.get(i).unwrap());
                 }
                 i = i + 1;
             }
@@ -177,11 +177,11 @@ impl TickArrayState {
     /// and current_tick_index % tick_spacing maybe not equal zero.
     /// If price move to left tick <= current_tick_index, or to right tick > current_tick_index
     pub fn next_initialized_tick(
-        &mut self,
+        &self,
         current_tick_index: i32,
         tick_spacing: u16,
         zero_for_one: bool,
-    ) -> Result<Option<&mut TickState>> {
+    ) -> Result<Option<&TickState>> {
         let current_tick_array_start_index =
             TickArrayState::get_array_start_index(current_tick_index, tick_spacing);
         if current_tick_array_start_index != self.start_tick_index {
@@ -193,7 +193,7 @@ impl TickArrayState {
         if zero_for_one {
             while offset_in_array >= 0 {
                 if self.ticks[offset_in_array as usize].is_initialized() {
-                    return Ok(self.ticks.get_mut(offset_in_array as usize));
+                    return Ok(self.ticks.get(offset_in_array as usize));
                 }
                 offset_in_array = offset_in_array - 1;
             }
@@ -201,7 +201,7 @@ impl TickArrayState {
             offset_in_array = offset_in_array + 1;
             while offset_in_array < TICK_ARRAY_SIZE {
                 if self.ticks[offset_in_array as usize].is_initialized() {
-                    return Ok(self.ticks.get_mut(offset_in_array as usize));
+                    return Ok(self.ticks.get(offset_in_array as usize));
                 }
                 offset_in_array = offset_in_array + 1;
             }
@@ -336,28 +336,28 @@ impl TickState {
     /// Transitions to the current tick as needed by price movement, returning the amount of liquidity
     /// added (subtracted) when tick is crossed from left to right (right to left)
     pub fn cross(
-        &mut self,
-        fee_growth_global_0_x64: u128,
-        fee_growth_global_1_x64: u128,
-        reward_infos: &[RewardInfo; REWARD_NUM],
+        &self,
+        _fee_growth_global_0_x64: u128,
+        _fee_growth_global_1_x64: u128,
+        _reward_infos: &[RewardInfo; REWARD_NUM],
     ) -> i128 {
-        self.fee_growth_outside_0_x64 = fee_growth_global_0_x64
-            .checked_sub(self.fee_growth_outside_0_x64)
-            .unwrap();
-        self.fee_growth_outside_1_x64 = fee_growth_global_1_x64
-            .checked_sub(self.fee_growth_outside_1_x64)
-            .unwrap();
+        // self.fee_growth_outside_0_x64 = fee_growth_global_0_x64
+        //     .checked_sub(self.fee_growth_outside_0_x64)
+        //     .unwrap();
+        // self.fee_growth_outside_1_x64 = fee_growth_global_1_x64
+        //     .checked_sub(self.fee_growth_outside_1_x64)
+        //     .unwrap();
 
-        for i in 0..REWARD_NUM {
-            if !reward_infos[i].initialized() {
-                continue;
-            }
+        // for i in 0..REWARD_NUM {
+        //     if !reward_infos[i].initialized() {
+        //         continue;
+        //     }
 
-            self.reward_growths_outside_x64[i] = reward_infos[i]
-                .reward_growth_global_x64
-                .checked_sub(self.reward_growths_outside_x64[i])
-                .unwrap();
-        }
+        //     self.reward_growths_outside_x64[i] = reward_infos[i]
+        //         .reward_growth_global_x64
+        //         .checked_sub(self.reward_growths_outside_x64[i])
+        //         .unwrap();
+        // }
 
         self.liquidity_net
     }
