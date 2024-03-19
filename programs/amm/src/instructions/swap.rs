@@ -192,7 +192,9 @@ pub fn swap_internal<'b, 'info>(
         pool_state.get_first_initialized_tick_array(&tickarray_bitmap_extension, zero_for_one)?;
     let mut current_vaild_tick_array_start_index = first_vaild_tick_array_start_index;
 
-    let mut tick_array_current = tick_array_states.get(0).unwrap();
+    let mut tick_array_current = tick_array_states
+        .get(0)
+        .expect(&tickarray_bitmap_extension.unwrap().pool_id.to_string());
     let mut used_tick_array_index = 0;
     // find the first active tick array account
     // for _ in 0..tick_array_states.len() {
@@ -263,10 +265,20 @@ pub fn swap_internal<'b, 'info>(
             if next_initialized_tickarray_index.is_none() {
                 return err!(ErrorCode::LiquidityInsufficient);
             }
-
             while tick_array_current.start_tick_index != next_initialized_tickarray_index.unwrap() {
                 used_tick_array_index += 1;
-                tick_array_current = tick_array_states.get(used_tick_array_index).unwrap();
+                tick_array_current = tick_array_states
+                    .get(used_tick_array_index)
+                    .expect(&format!(
+                        "{},{},{},{},{},{},{}",
+                        tick_array_current.pool_id.to_string(),
+                        tick_array_states.len(),
+                        used_tick_array_index,
+                        amount_specified,
+                        sqrt_price_limit_x64,
+                        zero_for_one,
+                        is_base_input
+                    ));
             }
             current_vaild_tick_array_start_index = next_initialized_tickarray_index.unwrap();
 
