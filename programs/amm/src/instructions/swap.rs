@@ -243,6 +243,7 @@ pub fn swap_internal<'b, 'info>(
         } else {
             if !is_match_pool_current_tick_array {
                 is_match_pool_current_tick_array = true;
+                // println!("fetch 1");
                 Box::new(*tick_array_current.first_initialized_tick(zero_for_one)?)
             } else {
                 Box::new(TickState::default())
@@ -263,6 +264,14 @@ pub fn swap_internal<'b, 'info>(
                     zero_for_one,
                 )?;
             if next_initialized_tickarray_index.is_none() {
+                println!(
+                    "{},{},{},{},{}",
+                    tick_array_current.pool_id.to_string(),
+                    amount_specified,
+                    sqrt_price_limit_x64,
+                    zero_for_one,
+                    is_base_input
+                );
                 return err!(ErrorCode::LiquidityInsufficient);
             }
             while tick_array_current.start_tick_index != next_initialized_tickarray_index.unwrap() {
@@ -282,9 +291,12 @@ pub fn swap_internal<'b, 'info>(
             }
             current_vaild_tick_array_start_index = next_initialized_tickarray_index.unwrap();
 
+            // println!("fetch 2");
             let first_initialized_tick = tick_array_current.first_initialized_tick(zero_for_one)?;
             next_initialized_tick = Box::new(*first_initialized_tick);
         }
+        // let temp = next_initialized_tick.tick;
+        // println!("step tick {}, next tick {}",step.tick_next,temp);
         step.tick_next = next_initialized_tick.tick;
         step.initialized = next_initialized_tick.is_initialized();
 
