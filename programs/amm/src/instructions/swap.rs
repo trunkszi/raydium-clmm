@@ -264,14 +264,14 @@ pub fn swap_internal<'b, 'info>(
                     zero_for_one,
                 )?;
             if next_initialized_tickarray_index.is_none() {
-                println!(
-                    "{},{},{},{},{}",
-                    tick_array_current.pool_id.to_string(),
-                    amount_specified,
-                    sqrt_price_limit_x64,
-                    zero_for_one,
-                    is_base_input
-                );
+                // println!(
+                //     "{},{},{},{},{}",
+                //     tick_array_current.pool_id.to_string(),
+                //     amount_specified,
+                //     sqrt_price_limit_x64,
+                //     zero_for_one,
+                //     is_base_input
+                // );
                 return err!(ErrorCode::LiquidityInsufficient);
             }
             while tick_array_current.start_tick_index != next_initialized_tickarray_index.unwrap() {
@@ -279,16 +279,16 @@ pub fn swap_internal<'b, 'info>(
                 tick_array_current = match tick_array_states.get(used_tick_array_index) {
                     Some(t) => t,
                     None => {
-                        println!(
-                            "{},{},{},{},{},{},{}",
-                            tick_array_current.pool_id.to_string(),
-                            tick_array_states.len(),
-                            used_tick_array_index,
-                            amount_specified,
-                            sqrt_price_limit_x64,
-                            zero_for_one,
-                            is_base_input
-                        );
+                        // println!(
+                        //     "{},{},{},{},{},{},{}",
+                        //     tick_array_current.pool_id.to_string(),
+                        //     tick_array_states.len(),
+                        //     used_tick_array_index,
+                        //     amount_specified,
+                        //     sqrt_price_limit_x64,
+                        //     zero_for_one,
+                        //     is_base_input
+                        // );
                         return err!(ErrorCode::LiquidityInsufficient);
                     }
                 };
@@ -319,15 +319,15 @@ pub fn swap_internal<'b, 'info>(
             step.sqrt_price_next_x64
         };
 
-        if zero_for_one {
-            require_gte!(state.tick, step.tick_next);
-            require_gte!(step.sqrt_price_start_x64, step.sqrt_price_next_x64);
-            require_gte!(step.sqrt_price_start_x64, target_price);
-        } else {
-            require_gt!(step.tick_next, state.tick);
-            require_gte!(step.sqrt_price_next_x64, step.sqrt_price_start_x64);
-            require_gte!(target_price, step.sqrt_price_start_x64);
-        }
+        // if zero_for_one {
+        //     require_gte!(state.tick, step.tick_next);
+        //     require_gte!(step.sqrt_price_start_x64, step.sqrt_price_next_x64);
+        //     require_gte!(step.sqrt_price_start_x64, target_price);
+        // } else {
+        //     require_gt!(step.tick_next, state.tick);
+        //     require_gte!(step.sqrt_price_next_x64, step.sqrt_price_start_x64);
+        //     require_gte!(target_price, step.sqrt_price_start_x64);
+        // }
         #[cfg(feature = "enable-log")]
         msg!(
             "sqrt_price_current_x64:{}, sqrt_price_target:{}, liquidity:{}, amount_remaining:{}",
@@ -379,47 +379,47 @@ pub fn swap_internal<'b, 'info>(
 
         let step_fee_amount = step.fee_amount;
         // if the protocol fee is on, calculate how much is owed, decrement fee_amount, and increment protocol_fee
-        if amm_config.protocol_fee_rate > 0 {
-            let delta = U128::from(step_fee_amount)
-                .checked_mul(amm_config.protocol_fee_rate.into())
-                .unwrap()
-                .checked_div(FEE_RATE_DENOMINATOR_VALUE.into())
-                .unwrap()
-                .as_u64();
-            step.fee_amount = step.fee_amount.checked_sub(delta).unwrap();
-            state.protocol_fee = state.protocol_fee.checked_add(delta).unwrap();
-        }
+        // if amm_config.protocol_fee_rate > 0 {
+        //     let delta = U128::from(step_fee_amount)
+        //         .checked_mul(amm_config.protocol_fee_rate.into())
+        //         .unwrap()
+        //         .checked_div(FEE_RATE_DENOMINATOR_VALUE.into())
+        //         .unwrap()
+        //         .as_u64();
+        //     step.fee_amount = step.fee_amount.checked_sub(delta).unwrap();
+        //     state.protocol_fee = state.protocol_fee.checked_add(delta).unwrap();
+        // }
         // if the fund fee is on, calculate how much is owed, decrement fee_amount, and increment fund_fee
-        if amm_config.fund_fee_rate > 0 {
-            let delta = U128::from(step_fee_amount)
-                .checked_mul(amm_config.fund_fee_rate.into())
-                .unwrap()
-                .checked_div(FEE_RATE_DENOMINATOR_VALUE.into())
-                .unwrap()
-                .as_u64();
-            step.fee_amount = step.fee_amount.checked_sub(delta).unwrap();
-            state.fund_fee = state.fund_fee.checked_add(delta).unwrap();
-        }
+        // if amm_config.fund_fee_rate > 0 {
+        //     let delta = U128::from(step_fee_amount)
+        //         .checked_mul(amm_config.fund_fee_rate.into())
+        //         .unwrap()
+        //         .checked_div(FEE_RATE_DENOMINATOR_VALUE.into())
+        //         .unwrap()
+        //         .as_u64();
+        //     step.fee_amount = step.fee_amount.checked_sub(delta).unwrap();
+        //     state.fund_fee = state.fund_fee.checked_add(delta).unwrap();
+        // }
 
         // update global fee tracker
-        if state.liquidity > 0 {
-            let fee_growth_global_x64_delta = U128::from(step.fee_amount)
-                .mul_div_floor(U128::from(fixed_point_64::Q64), U128::from(state.liquidity))
-                .unwrap()
-                .as_u128();
+        // if state.liquidity > 0 {
+        //     let fee_growth_global_x64_delta = U128::from(step.fee_amount)
+        //         .mul_div_floor(U128::from(fixed_point_64::Q64), U128::from(state.liquidity))
+        //         .unwrap()
+        //         .as_u128();
 
-            state.fee_growth_global_x64 = state
-                .fee_growth_global_x64
-                .checked_add(fee_growth_global_x64_delta)
-                .unwrap();
-            state.fee_amount = state.fee_amount.checked_add(step.fee_amount).unwrap();
-            #[cfg(feature = "enable-log")]
-            msg!(
-                "fee_growth_global_x64_delta:{}, state.fee_growth_global_x64:{}, state.liquidity:{}, step.fee_amount:{}, state.fee_amount:{}",
-                fee_growth_global_x64_delta,
-                state.fee_growth_global_x64, state.liquidity, step.fee_amount, state.fee_amount
-            );
-        }
+        //     state.fee_growth_global_x64 = state
+        //         .fee_growth_global_x64
+        //         .checked_add(fee_growth_global_x64_delta)
+        //         .unwrap();
+        //     state.fee_amount = state.fee_amount.checked_add(step.fee_amount).unwrap();
+        //     #[cfg(feature = "enable-log")]
+        //     msg!(
+        //         "fee_growth_global_x64_delta:{}, state.fee_growth_global_x64:{}, state.liquidity:{}, step.fee_amount:{}, state.fee_amount:{}",
+        //         fee_growth_global_x64_delta,
+        //         state.fee_growth_global_x64, state.liquidity, step.fee_amount, state.fee_amount
+        //     );
+        // }
         // shift tick if we reached the next price
         if state.sqrt_price_x64 == step.sqrt_price_next_x64 {
             // if the tick is initialized, run the tick transition
