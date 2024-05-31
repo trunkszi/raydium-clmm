@@ -186,13 +186,13 @@ pub fn get_delta_amount_0_unsigned(
                 .unwrap(),
             U256::from(sqrt_ratio_a_x64),
         )
-        .as_u64()
+        .low_u64()
     } else {
         (numerator_1
             .mul_div_floor(numerator_2, U256::from(sqrt_ratio_b_x64))
             .unwrap()
             / U256::from(sqrt_ratio_a_x64))
-        .as_u64()
+        .low_u64()
     }
 }
 
@@ -221,7 +221,7 @@ pub fn get_delta_amount_1_unsigned(
         )
     }
     .unwrap()
-    .as_u64()
+    .low_u64()
 }
 
 /// Helper function to get signed delta amount_0 for given liquidity and price range
